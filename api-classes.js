@@ -49,19 +49,19 @@ class StoryList {
     // the script.js file where it will be appended to the DOM
     let response = await axios.post(`${BASE_URL}/stories`, 
     {"token": user, "story": newStory});
-    return response.data.story
+    return response.data.story;
   }
 
   async addFavorite(username, storyId, loginToken){
-    await axios.post(`${BASE_URL}/users/${username}/favorites/${storyId}`,{token: `${loginToken}`})
+    await axios.post(`${BASE_URL}/users/${username}/favorites/${storyId}`,{token: loginToken});
   }
 
   async removeFavorite(username, storyId, loginToken){
-    await axios.delete(`${BASE_URL}/users/${username}/favorites/${storyId}`,{data: {token: `${loginToken}`}})
+    await axios.delete(`${BASE_URL}/users/${username}/favorites/${storyId}`,{data: {token: loginToken}});
   }
 
   async deleteStory(storyId, loginToken){
-    await axios.delete(`${BASE_URL}/stories/${storyId}`,{data: {token: `${loginToken}`}})
+    await axios.delete(`${BASE_URL}/stories/${storyId}`,{data: {token: loginToken}});
   }
 }
 
