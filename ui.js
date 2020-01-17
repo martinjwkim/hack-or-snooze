@@ -135,11 +135,17 @@ $(async function() {
   //  * Event Handler for Clicking My Stories
   //  */
 
-  $myStories.on("click", function() {
+  $myStories.on("click", async function() {
     // Show the Login and Create Account Forms
-    $loginForm.slideToggle();
-    $createAccountForm.slideToggle();
-    $allStoriesList.toggle();
+    hideElements();
+    $favoritedArticles.hide();
+    $filteredArticles.show();
+
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    currentUser = await User.getLoggedInUser(token, username);
+
+    await generateMyStories();
   });
 
 
@@ -227,7 +233,21 @@ $(async function() {
     // loop through all of our stories and generate HTML for them
     for (let story of currentUser.favorites) {
       const result = generateFavoritesHTML(story);
-      $favoritedArticles.append(result);
+      $favoritedArticles.prepend(result);
+    }
+  }
+
+  async function generateMyStories() {
+    // get an instance of FavoriteList
+    // const storyListInstance = await StoryList.getStories();
+    // update our global variable
+    // storyList = storyListInstance;
+    $filteredArticles.empty();
+
+    // loop through all of our stories and generate HTML for them
+    for (let story of currentUser.ownStories) {
+      const result = generateOwnStoriesHTML(story);
+      $filteredArticles.append(result);
     }
   }
 
@@ -287,7 +307,39 @@ $(async function() {
     return storyMarkup;
   }
 
-  $("#all-articles-list").on("click",".star-icon",async function(evt){
+  function generateOwnStoriesHTML(story) {
+    let hostName = getHostName(story.url);
+    
+    // render story markup
+    
+    let starClass = "far"
+    if (currentUser !== null){
+      for (let currentFav of currentUser.favorites){
+        if ( currentFav.storyId === story.storyId){
+          starClass = "fas"
+        }
+      }
+    }
+    
+
+    // render story markup
+    const storyMarkup = $(`
+      <li id="${story.storyId}">
+        <i class="fas fa-trash-alt trash-icon"></i>
+        <i class="${starClass} fa-star star-icon"></i>
+        <a class="article-link" href="${story.url}" target="a_blank">
+          <strong>${story.title}</strong>
+        </a>
+        <small class="article-author">by ${story.author}</small>
+        <small class="article-hostname ${hostName}">(${hostName})</small>
+        <small class="article-username">posted by ${story.username}</small>
+      </li>
+    `);
+
+    return storyMarkup;
+  }
+
+  $(".articles-container").on("click",".star-icon",async function(evt){
     evt.target.classList.toggle("far")
     evt.target.classList.toggle("fas")
 
@@ -299,16 +351,15 @@ $(async function() {
       : await storyList.removeFavorite(username,storyId,loginToken)
   })
 
-  $("#favorited-articles").on("click",".star-icon",async function(evt){
-    evt.target.classList.toggle("far")
-    evt.target.classList.toggle("fas")
-
+  $(".articles-container").on("click",".trash-icon",async function(evt){
     let storyId = (evt.target.closest("li").id);
-    let username = currentUser.username;
     let loginToken = currentUser.loginToken;
+    await storyList.deleteStory(storyId,loginToken)
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    currentUser = await User.getLoggedInUser(token, username);
+    await generateMyStories();
 
-    evt.target.classList.contains("fas") ? await storyList.addFavorite(username,storyId,loginToken)
-      : await storyList.removeFavorite(username,storyId,loginToken)
   })
 
   /* hide all elements in elementsArr */

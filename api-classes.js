@@ -59,6 +59,10 @@ class StoryList {
   async removeFavorite(username, storyId, loginToken){
     await axios.delete(`${BASE_URL}/users/${username}/favorites/${storyId}`,{data: {token: `${loginToken}`}})
   }
+
+  async deleteStory(storyId, loginToken){
+    await axios.delete(`${BASE_URL}/stories/${storyId}`,{data: {token: `${loginToken}`}})
+  }
 }
 
 
@@ -133,6 +137,8 @@ class User {
 
     return existingUser;
   }
+
+  
 
   /** Get user instance for the logged-in-user.
    *
