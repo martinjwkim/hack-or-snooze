@@ -47,6 +47,17 @@ class StoryList {
     // TODO - Implement this functions!
     // this function should return the newly created story so it can be used in
     // the script.js file where it will be appended to the DOM
+    let response = await axios.post(`${BASE_URL}/stories`, 
+    {"token": user, "story": newStory});
+    return response.data.story
+  }
+
+  async addFavorite(username, storyId, loginToken){
+    await axios.post(`${BASE_URL}/users/${username}/favorites/${storyId}`,{token: `${loginToken}`})
+  }
+
+  async removeFavorite(username, storyId, loginToken){
+    await axios.delete(`${BASE_URL}/users/${username}/favorites/${storyId}`,{token: `${loginToken}`})
   }
 }
 

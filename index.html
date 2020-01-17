@@ -9,16 +9,20 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU"
     crossorigin="anonymous">
   <link rel="stylesheet" href="style.css" type="text/css">
+  <script src="https://kit.fontawesome.com/ee2c810a3f.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
   <nav>
     <b><a class="nav-link navbar-brand" href="#" id="nav-all">Hack or Snooze</a></b>
     <a class="nav-link nav-right" href="#" id="nav-login">login/create user</a>
+    <a class="nav-link nav-left hidden" href="#" id="submit-story">submit</a>
+    <a class="nav-link nav-left hidden" href="#" id="favorites">favorites</a>
+    <a class="nav-link nav-left hidden" href="#" id="my-stories">my stories</a>
     <span class="nav-link nav-right hidden" id="nav-welcome">
       <a href="#" id="nav-user-profile"></a>
     </span>
-    <a class="hidden" id="nav-logout" href="#">
+    <a class="hidden nav-right" id="nav-logout" href="#">
       <small>(logout)</small>
     </a>
   </nav>
@@ -46,6 +50,7 @@
     </article>
     <article>
       <ul id="favorited-articles" class="hidden articles-list">
+        favorites list
       </ul>
     </article>
     <article>

@@ -2,12 +2,17 @@ $(async function() {
   // cache some selectors we'll be using quite a bit
   const $allStoriesList = $("#all-articles-list");
   const $submitForm = $("#submit-form");
+  const $favoritedArticles = $("#favorited-articles");
   const $filteredArticles = $("#filtered-articles");
   const $loginForm = $("#login-form");
   const $createAccountForm = $("#create-account-form");
   const $ownStories = $("#my-articles");
+  const $navWelcome = $('nav-welcome')
   const $navLogin = $("#nav-login");
   const $navLogOut = $("#nav-logout");
+  const $submitStory = $('#submit-story');
+  const $favorites = $('#favorites');
+  const $myStories = $('#my-stories');
 
   // global storyList variable
   let storyList = null;
@@ -58,6 +63,26 @@ $(async function() {
   });
 
   /**
+   * Submit Story Button Event Listener
+   */
+  $submitForm.on("submit", async function(evt) {
+    evt.preventDefault();
+
+    const token = localStorage.getItem("token");
+
+    const newStory = {
+      author: $("#author").val(), 
+      title: $('#title').val(), 
+      url: $('#url').val()
+    }
+
+    let storyObj = await storyList.addStory(token,newStory);
+
+    const result = generateStoryHTML(storyObj);
+    $allStoriesList.prepend(result);
+  });
+
+  /**
    * Log Out Functionality
    */
 
@@ -79,6 +104,38 @@ $(async function() {
     $allStoriesList.toggle();
   });
 
+  //  /**
+  //  * Event Handler for Clicking Submit
+  //  */
+
+  $submitStory.on("click", function() {
+    // Show the Login and Create Account Forms
+    $submitForm.slideToggle();
+  });
+
+   /**
+   * Event Handler for Clicking Favorites
+   */
+
+  $favorites.on("click", async function() {
+    hideElements();
+    $favoritedArticles.show();
+    await generateFavorites();
+  });
+
+  //  /**
+  //  * Event Handler for Clicking My Stories
+  //  */
+
+  $myStories.on("click", function() {
+    // Show the Login and Create Account Forms
+    $loginForm.slideToggle();
+    $createAccountForm.slideToggle();
+    $allStoriesList.toggle();
+  });
+
+
+  
   /**
    * Event handler for Navigation to Homepage
    */
@@ -87,6 +144,7 @@ $(async function() {
     hideElements();
     await generateStories();
     $allStoriesList.show();
+    $favoritedArticles.hide();
   });
 
   /**
@@ -98,6 +156,7 @@ $(async function() {
     // let's see if we're logged in
     const token = localStorage.getItem("token");
     const username = localStorage.getItem("username");
+    
 
     // if there is a token in localStorage, call User.getLoggedInUser
     //  to get an instance of User with the right details
@@ -150,6 +209,23 @@ $(async function() {
     }
   }
 
+  async function generateFavorites() {
+    console.log(currentUser)
+    // get an instance of FavoriteList
+    const storyListInstance = await StoryList.getStories();
+    // update our global variable
+    storyList = storyListInstance;
+    $favoritedArticles.empty();
+
+    // loop through all of our stories and generate HTML for them
+    for (let story of currentUser.favorites) {
+      const result = generateFavoritesHTML(story);
+      $favoritedArticles.append(result);
+    }
+  }
+
+  
+
   /**
    * A function to render HTML for an individual Story instance
    */
@@ -160,6 +236,7 @@ $(async function() {
     // render story markup
     const storyMarkup = $(`
       <li id="${story.storyId}">
+        <i class="far fa-star star-icon"></i>
         <a class="article-link" href="${story.url}" target="a_blank">
           <strong>${story.title}</strong>
         </a>
@@ -171,6 +248,49 @@ $(async function() {
 
     return storyMarkup;
   }
+
+  function generateFavoritesHTML(story) {
+    let hostName = getHostName(story.url);
+
+    // render story markup
+    const storyMarkup = $(`
+      <li id="${story.storyId}">
+        <i class="fas fa-star star-icon"></i>
+        <a class="article-link" href="${story.url}" target="a_blank">
+          <strong>${story.title}</strong>
+        </a>
+        <small class="article-author">by ${story.author}</small>
+        <small class="article-hostname ${hostName}">(${hostName})</small>
+        <small class="article-username">posted by ${story.username}</small>
+      </li>
+    `);
+
+    return storyMarkup;
+  }
+
+  $("#all-articles-list").on("click",".star-icon",async function(evt){
+    evt.target.classList.toggle("far")
+    evt.target.classList.toggle("fas")
+
+    let storyId = (evt.target.closest("li").id);
+    let username = currentUser.username;
+    let loginToken = currentUser.loginToken;
+
+    evt.target.classList.contains("fas") ? await storyList.addFavorite(username,storyId,loginToken)
+      : await storyList.removeFavorite(username,storyId,loginToken)
+  })
+
+  $("#favorited-articles").on("click",".star-icon",async function(evt){
+    evt.target.classList.toggle("far")
+    evt.target.classList.toggle("fas")
+
+    let storyId = (evt.target.closest("li").id);
+    let username = currentUser.username;
+    let loginToken = currentUser.loginToken;
+
+    evt.target.classList.contains("fas") ? await storyList.addFavorite(username,storyId,loginToken)
+      : await storyList.removeFavorite(username,storyId,loginToken)
+  })
 
   /* hide all elements in elementsArr */
 
@@ -189,6 +309,10 @@ $(async function() {
   function showNavForLoggedInUser() {
     $navLogin.hide();
     $navLogOut.show();
+    $submitStory.show();
+    $favorites.show();
+    $myStories.show();
+    $navWelcome.show();
   }
 
   /* simple function to pull the hostname from a URL */
