@@ -57,7 +57,7 @@ class StoryList {
   }
 
   async removeFavorite(username, storyId, loginToken){
-    await axios.delete(`${BASE_URL}/users/${username}/favorites/${storyId}`,{token: `${loginToken}`})
+    await axios.delete(`${BASE_URL}/users/${username}/favorites/${storyId}`,{data: {token: `${loginToken}`}})
   }
 }
 

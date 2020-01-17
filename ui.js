@@ -120,6 +120,14 @@ $(async function() {
   $favorites.on("click", async function() {
     hideElements();
     $favoritedArticles.show();
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    
+
+    // if there is a token in localStorage, call User.getLoggedInUser
+    //  to get an instance of User with the right details
+    //  this is designed to run once, on page load
+    currentUser = await User.getLoggedInUser(token, username);
     await generateFavorites();
   });
 
@@ -210,11 +218,10 @@ $(async function() {
   }
 
   async function generateFavorites() {
-    console.log(currentUser)
     // get an instance of FavoriteList
-    const storyListInstance = await StoryList.getStories();
+    // const storyListInstance = await StoryList.getStories();
     // update our global variable
-    storyList = storyListInstance;
+    // storyList = storyListInstance;
     $favoritedArticles.empty();
 
     // loop through all of our stories and generate HTML for them
@@ -233,10 +240,20 @@ $(async function() {
   function generateStoryHTML(story) {
     let hostName = getHostName(story.url);
 
+    let starClass = "far"
+    if (currentUser !== null){
+      for (let currentFav of currentUser.favorites){
+        if ( currentFav.storyId === story.storyId){
+          starClass = "fas"
+        }
+      }
+    }
+    
+
     // render story markup
     const storyMarkup = $(`
       <li id="${story.storyId}">
-        <i class="far fa-star star-icon"></i>
+        <i class="${starClass} fa-star star-icon"></i>
         <a class="article-link" href="${story.url}" target="a_blank">
           <strong>${story.title}</strong>
         </a>
@@ -246,12 +263,14 @@ $(async function() {
       </li>
     `);
 
+    starClass = "far"
+
     return storyMarkup;
   }
 
   function generateFavoritesHTML(story) {
     let hostName = getHostName(story.url);
-
+    
     // render story markup
     const storyMarkup = $(`
       <li id="${story.storyId}">
@@ -307,6 +326,7 @@ $(async function() {
   }
 
   function showNavForLoggedInUser() {
+    generateStories();
     $navLogin.hide();
     $navLogOut.show();
     $submitStory.show();
