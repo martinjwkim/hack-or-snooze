@@ -15,6 +15,7 @@ $(async function() {
   const $myStories = $('#my-stories');
   const $myProfile = $('#user-profile');
   const $loggedInUser = $('#logged-in-user');
+  const $editForm = $('#edit-form');
 
   // global storyList variable
   let storyList = null;
@@ -24,11 +25,8 @@ $(async function() {
 
   await checkIfLoggedIn();
 
-  /**
-   * Event listener for logging in.
-   *  If successfully we will setup the user instance
-   */
-
+  //Event listener for logging in.
+  //If successfully we will setup the user instance
   $loginForm.on("submit", async function(evt) {
     evt.preventDefault(); // no page-refresh on submit
 
@@ -252,6 +250,7 @@ $(async function() {
     
     const storyMarkup = $(`
       <li id="${story.storyId}">
+        <i class="far fa-edit edit-icon"></i>
         <i class="fas fa-trash-alt trash-icon"></i>
         <i class="${starClass} fa-star star-icon"></i>
         <a class="article-link" href="${story.url}" target="a_blank">
@@ -286,6 +285,39 @@ $(async function() {
     await reloadUserInfo();
   })
 
+  $(".articles-container").on("click",".edit-icon",async function(evt){
+    $editForm.show();
+
+    let storyId = (evt.target.closest("li").id);
+    let loginToken = currentUser.loginToken;
+
+    let articleAuthor=evt.target.closest("li").getElementsByClassName("article-author")[0].innerHTML
+    let articleTitle=evt.target.closest('li').getElementsByClassName('article-link')[0].innerHTML
+    let articleURL=evt.target.closest('li').getElementsByClassName('article-hostname')[0].innerHTML
+
+    $('#edit-author').val(articleAuthor.slice(3,articleAuthor.length))
+    $('#edit-title').val(articleTitle.slice(19,-18))
+    $('#edit-url').val(("http://").concat(articleURL.slice(1,-1)))
+
+    $('#edit-form').on("submit",async function(){
+    evt.preventDefault();
+
+    const updatedStory = {
+      author: $("#edit-author").val(), 
+      title: $('#edit-title').val(), 
+      url: $('#edit-url').val()
+    }
+
+    await storyList.editStory(storyId,loginToken,updatedStory)
+
+    await reloadUserInfo();
+    })
+
+    // await storyList.editStory(storyId,loginToken,updatedStory)
+
+    // await reloadUserInfo();
+  })
+
   /* hide all elements in elementsArr */
 
   function hideElements(element) {
@@ -297,7 +329,8 @@ $(async function() {
       $loginForm,
       $createAccountForm,
       $favoritedArticles,
-      $myProfile
+      $myProfile,
+      $editForm
     ];
     elementsArr.forEach($elem => $elem.hide());
 
@@ -318,6 +351,7 @@ $(async function() {
     $navWelcome.show();
     $myProfile.hide();
     $loggedInUser.show();
+    $editForm.hide()
   }
 
   /* simple function to pull the hostname from a URL */

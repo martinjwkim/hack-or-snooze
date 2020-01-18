@@ -63,6 +63,10 @@ class StoryList {
   async deleteStory(storyId, loginToken){
     await axios.delete(`${BASE_URL}/stories/${storyId}`,{data: {token: loginToken}});
   }
+
+  async editStory(storyId, loginToken, updatedStory){
+    await axios.patch(`${BASE_URL}/stories/${storyId}`,{"token": loginToken, "story": updatedStory})
+  }
 }
 
 
@@ -94,14 +98,16 @@ class User {
    */
 
   static async create(username, password, name) {
-    const response = await axios.post(`${BASE_URL}/signup`, {
+    try{var response = await axios.post(`${BASE_URL}/signup`, {
       user: {
         username,
         password,
         name
       }
-    });
-
+    });}
+    catch(error){
+      alert("Username is taken.")
+    }
     // build a new User instance from the API response
     const newUser = new User(response.data.user);
 
@@ -137,8 +143,6 @@ class User {
 
     return existingUser;
   }
-
-  
 
   /** Get user instance for the logged-in-user.
    *

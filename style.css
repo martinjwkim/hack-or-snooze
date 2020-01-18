@@ -145,19 +145,19 @@ form > hr {
   cursor: pointer;
 }
 
-.star,
-.trash-can,
-.pencil {
+.star-icon,
+.trash-icon,
+.edit-icon {
   font-size: 0.75rem;
   margin: 0 2px;
   cursor: pointer;
 }
 
-.trash-can:hover {
+.trash-icon:hover {
   color: crimson;
 }
 
-.pencil:hover {
+.edit-icon:hover {
   color: darkblue;
 }
 
